@@ -1,5 +1,5 @@
 import invariant from 'tiny-invariant';
-import { validateAndParseAddress } from 'starknet';
+import { getChecksumAddress } from 'starknet';
 
 export function normalizeChainId(chainId: string | number): number {
   if (typeof chainId === 'string') {
@@ -24,7 +24,7 @@ export function normalizeChainId(chainId: string | number): number {
 }
 
 export function normalizeAccount(address: string): string {
-  const starknetAddress = validateAndParseAddress(address);
+  const starknetAddress = getChecksumAddress(address);
 
   return starknetAddress;
 }
