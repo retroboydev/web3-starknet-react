@@ -31,7 +31,7 @@ export class BraavosConnector extends AbstractConnector {
 
     return {
       provider: wallet.provider,
-      chainId: 5,
+      chainId: wallet.chainId,
       ...(account ? { account } : {}),
       ...(connectedAddress ? { connectedAddress } : {}),
     };
@@ -71,7 +71,7 @@ export class BraavosConnector extends AbstractConnector {
     }
 
     // Temporary
-    return 5;
+    return wallet.chainId;
   }
 
   public getAccount(): AccountInterface | undefined {

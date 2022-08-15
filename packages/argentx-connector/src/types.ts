@@ -37,16 +37,19 @@ interface IStarknetWindowObject {
   provider: import('starknet').Provider;
   selectedAddress?: string;
   version: string;
+  chainId:string;
 }
 
 interface ConnectedStarknetWindowObject extends IStarknetWindowObject {
   isConnected: true;
   account: import('starknet').AccountInterface;
   selectedAddress: string;
+  chainId:string;
 }
 
 interface DisconnectedStarknetWindowObject extends IStarknetWindowObject {
   isConnected: false;
+  chainId: string;
 }
 
 export type StarknetWindowObject =

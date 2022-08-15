@@ -44,7 +44,7 @@ export class ArgentXConnector extends AbstractConnector {
 
     return {
       provider: window.starknet.provider,
-      chainId: 5,
+      chainId: window.starknet.chainId,
       ...(account ? { account } : {}),
       ...(connectedAddress ? { connectedAddress } : {}),
     };
@@ -87,7 +87,7 @@ export class ArgentXConnector extends AbstractConnector {
     }
 
     // Temporary
-    return 5;
+    return window.starknet.chainId;
   }
 
   public getAccount(): AccountInterface | undefined {
