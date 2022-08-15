@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "2.1.3",
+  "version": "2.2.0",
   "author": "avimak@braavos.app",
   "main": "dist/index.js",
   "module": "dist/braavos-connector.esm.js",
