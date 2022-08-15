@@ -41,7 +41,7 @@
     "react": ">=16.8",
     "react-dom": ">=16.8",
     "rimraf": "^3.0.1",
-    "tsdx": "^0.11.0"
+    "tsdx": "^0.14.1"
   },
   "dependencies": {
     "starknet": "^4.3.0",
