@@ -46,3 +46,26 @@ _Open a PR to add your starknet project to the list_
 
 - Build and watch for changes \
   `yarn start`
+
+## Local testing
+
+There are two possible ways of local testing: by using the [yarn link](https://classic.yarnpkg.com/en/docs/cli/link) command or by manual transferring of built files
+
+### Testing by using the [yarn link](https://classic.yarnpkg.com/en/docs/cli/link) command
+Since we use `lerna`, it's a bit tricky.
+- run `yarn buid` in the root directory of the project, you should see the `dist` folders after that in all subpackages
+- run `yarn start` in the root directory of the project
+- open a new tab, go to the folder of the subpackage you want to test and run `yarn link` in the root directory of that package. For example, `cd ./packages/argentx-connector && yarn link`. You should see in the console command for using the linked module, e.g. `yarn link "@web3-starknet-react/argentx-connector"`. You should do the same for all subpackages you want to test. 
+- go to the project where we want to test our module, e.g. `jediswap-interface`
+- to install our linked subpackage, run `yarn link "@web3-starknet-react/argentx-connector"` (or the similar command for others subpackages) 
+- if everything was done right, you would see a success message in the console, and a symlink to our local package will appear in `node_modules/@web3-starknet-react/`
+- after that we can start working with our local subpackages, all changes should be updated automatically
+- once we're done, go to the folder of the subpackage we tested and run the `yarn unlink` command there. Run `yarn unlink "@web3-starknet-react/argentx-connector" && yarn install --check-files` (or the similar command for others subpackages) in the project where we tested our module after that.
+
+### Testing with manual transferring of built files
+This method is less convenient and requires a lot of manual operations
+- run `yarn buid` in the root directory of the project, you should see the `dist` folders after that in all subpackages
+- run `yarn start` in the root directory of the project
+- copy the contents of the `dist` folder to `node_modules/@web3-starknet-react/argentx-connector/dist` (or to the similar directory for other subpackages) of the project in which we want to test our module
+- if you are using `vite` in a project, you should add the `--force` flag to the project launch command, for example, `vite --open --force`
+- when you change your module, you should copy and past the contents of the `dist` folder again
