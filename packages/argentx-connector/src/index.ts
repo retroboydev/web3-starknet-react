@@ -2,8 +2,15 @@ import { AbstractConnector } from '@web3-starknet-react/abstract-connector';
 import {
   AbstractConnectorArguments,
   ConnectorUpdate,
+  ChainsLookupInterface
 } from '@web3-starknet-react/types';
 import { AccountInterface } from 'starknet';
+
+
+const chainsLookup: ChainsLookupInterface = {
+  'SN_MAIN': 1,
+  'SN_GOERLI': 5
+}
 
 export class NoStarknetProviderError extends Error {
   public constructor() {
@@ -18,6 +25,7 @@ export class ArgentXConnector extends AbstractConnector {
     super(kwargs);
 
     this.handleAccountsChanged = this.handleAccountsChanged.bind(this);
+    this.handleNetworkChanged = this.handleNetworkChanged.bind(this);
   }
 
   public async activate(): Promise<ConnectorUpdate> {
@@ -26,6 +34,7 @@ export class ArgentXConnector extends AbstractConnector {
     }
     if (window.starknet?.on) {
       window.starknet.on('accountsChanged', this.handleAccountsChanged);
+      window.starknet.on('networkChanged', this.handleNetworkChanged);
     }
 
     // const { ...provider } = this.starknet.signer;
@@ -42,9 +51,11 @@ export class ArgentXConnector extends AbstractConnector {
       account = window.starknet.account;
     }
 
+    const chainIdNumber = chainsLookup[window.starknet.chainId] ?? 0;
+
     return {
       provider: window.starknet.provider,
-      chainId: 5,
+      chainId: chainIdNumber,
       ...(account ? { account } : {}),
       ...(connectedAddress ? { connectedAddress } : {}),
     };
@@ -53,8 +64,8 @@ export class ArgentXConnector extends AbstractConnector {
   private handleAccountsChanged(accountAddresses: string[]) {
     if (__DEV__) {
       console.log(
-        "Handling 'accountsChanged' event with payload",
-        accountAddresses
+          "Handling 'accountsChanged' event with payload",
+          accountAddresses
       );
     }
 
@@ -63,6 +74,17 @@ export class ArgentXConnector extends AbstractConnector {
     } else {
       this.emitUpdate({ connectedAddress: accountAddresses[0] });
     }
+  }
+
+  private handleNetworkChanged(chainId: string) {
+    if (__DEV__) {
+      console.log(
+          "Handling 'networkChanged' event with payload",
+          chainId
+      );
+    }
+    const chainIdNumber = chainsLookup[chainId] ?? 0;
+    this.emitUpdate({ chainId: chainIdNumber });
   }
 
   public async getProvider(): Promise<any> {
@@ -86,8 +108,10 @@ export class ArgentXConnector extends AbstractConnector {
       throw new NoStarknetProviderError();
     }
 
+    const chainIdNumber = chainsLookup[window.starknet.chainId] ?? 0;
+
     // Temporary
-    return 5;
+    return chainIdNumber;
   }
 
   public getAccount(): AccountInterface | undefined {

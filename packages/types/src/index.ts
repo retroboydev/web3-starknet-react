@@ -16,3 +16,7 @@ export enum ConnectorEvent {
   Error = 'StarknetReactError',
   Deactivate = 'StarknetReactDeactivate'
 }
+
+export interface ChainsLookupInterface {
+  [key: string]: number;
+}
