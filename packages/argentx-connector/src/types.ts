@@ -1,4 +1,5 @@
-export type EventHandler = (accounts: string[]) => void;
+export type AccountChangedEventHandler = (accounts: string[]) => void;
+export type NetworkChangedEventHandler = (chainId: string) => void;
 
 interface WatchAssetParameters {
   type: 'ERC20'; // The asset's interface, e.g. 'ERC20'
@@ -31,8 +32,8 @@ interface IStarknetWindowObject {
   request: (call: RpcMessage) => Promise<void>;
   enable: (options?: { showModal?: boolean }) => Promise<string[]>;
   isPreauthorized: () => Promise<boolean>;
-  on: (event: 'accountsChanged', handleEvent: EventHandler) => void;
-  off: (event: 'accountsChanged', handleEvent: EventHandler) => void;
+  on: (event: 'accountsChanged' | 'networkChanged', handleEvent: AccountChangedEventHandler | NetworkChangedEventHandler) => void;
+  off: (event: 'accountsChanged' | 'networkChanged', handleEvent: AccountChangedEventHandler | NetworkChangedEventHandler) => void;
   account?: import('starknet').AccountInterface;
   provider: import('starknet').Provider;
   selectedAddress?: string;
@@ -43,15 +44,17 @@ interface ConnectedStarknetWindowObject extends IStarknetWindowObject {
   isConnected: true;
   account: import('starknet').AccountInterface;
   selectedAddress: string;
+  chainId:string;
 }
 
 interface DisconnectedStarknetWindowObject extends IStarknetWindowObject {
   isConnected: false;
+  chainId: string;
 }
 
 export type StarknetWindowObject =
-  | ConnectedStarknetWindowObject
-  | DisconnectedStarknetWindowObject;
+    | ConnectedStarknetWindowObject
+    | DisconnectedStarknetWindowObject;
 
 declare global {
   interface Window {

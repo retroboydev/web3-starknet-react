@@ -1,7 +1,14 @@
 import { AbstractConnector } from '@web3-starknet-react/abstract-connector';
-import { ConnectorUpdate } from '@web3-starknet-react/types';
+import {AbstractConnectorArguments, ChainsLookupInterface, ConnectorUpdate} from '@web3-starknet-react/types';
 import { AccountInterface } from 'starknet';
 import { IStarknetWindowObject } from 'get-starknet';
+
+const chainsLookup: ChainsLookupInterface = {
+  '0x534e5f4d41494e': 1,
+  'mainnet-alpha': 1,
+  '0x534e5f474f45524c49': 5,
+  'goerli-alpha': 5
+}
 
 export class NoStarknetProviderError extends Error {
   public constructor() {
@@ -12,6 +19,13 @@ export class NoStarknetProviderError extends Error {
 }
 
 export class BraavosConnector extends AbstractConnector {
+  constructor(kwargs: AbstractConnectorArguments) {
+    super(kwargs);
+
+    this.handleAccountsChanged = this.handleAccountsChanged.bind(this);
+    this.handleNetworkChanged = this.handleNetworkChanged.bind(this);
+  }
+
   public async activate(): Promise<ConnectorUpdate> {
     const wallet = this.getBraavosWallet();
 
@@ -20,6 +34,7 @@ export class BraavosConnector extends AbstractConnector {
     }
 
     wallet.on('accountsChanged', this.handleAccountsChanged);
+    wallet.on('networkChanged', this.handleNetworkChanged);
 
     let account: AccountInterface | undefined = wallet.account;
     let connectedAddress: string | undefined = wallet.selectedAddress;
@@ -29,15 +44,17 @@ export class BraavosConnector extends AbstractConnector {
       account = wallet.account;
     }
 
+    const chainIdNumber = chainsLookup[wallet.provider.chainId] ?? 0;
+
     return {
       provider: wallet.provider,
-      chainId: 5,
+      chainId: chainIdNumber,
       ...(account ? { account } : {}),
       ...(connectedAddress ? { connectedAddress } : {}),
     };
   }
 
-  private handleAccountsChanged = (accountAddresses: string[]) => {
+  private handleAccountsChanged = (accountAddresses: string[] | string) => {
     if (__DEV__) {
       console.log(
         "Handling 'accountsChanged' event with payload",
@@ -48,9 +65,23 @@ export class BraavosConnector extends AbstractConnector {
     if (accountAddresses.length === 0) {
       this.emitDeactivate();
     } else {
-      this.emitUpdate({ connectedAddress: accountAddresses[0] });
+      this.emitUpdate({ connectedAddress: typeof accountAddresses == 'string'
+            ? accountAddresses
+            : accountAddresses[0]
+      });
     }
   };
+
+  private handleNetworkChanged(chainId: string) {
+    if (__DEV__) {
+      console.log(
+          "Handling 'networkChanged' event with payload",
+          chainId
+      );
+    }
+    const chainIdNumber = chainsLookup[chainId] ?? 0;
+    this.emitUpdate({ chainId: chainIdNumber });
+  }
 
   public async getProvider(): Promise<any> {
     return this.getBraavosWallet()?.provider;
@@ -70,8 +101,9 @@ export class BraavosConnector extends AbstractConnector {
       throw new NoStarknetProviderError();
     }
 
-    // Temporary
-    return 5;
+    const chainIdNumber = chainsLookup[wallet.provider.chainId] ?? 0;
+
+    return chainIdNumber;
   }
 
   public getAccount(): AccountInterface | undefined {
